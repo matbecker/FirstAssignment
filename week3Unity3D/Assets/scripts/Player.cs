@@ -5,6 +5,7 @@ public class Player : MonoBehaviour {
 
 	public float speed;
 	public Rigidbody rb;
+	[SerializeField] Transform shootPoint;
 
 	// Use this for initialization
 	void Start () {
@@ -14,9 +15,9 @@ public class Player : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		if (Input.GetButtonDown("Fire1"))
+		if (Input.GetKeyDown("z"))
 		{
-			Rigidbody InstantiateProjectile = Instantiate(rb, transform.position, transform.rotation) as Rigidbody;
+			Rigidbody InstantiateProjectile = Instantiate(rb, shootPoint.position, transform.rotation) as Rigidbody;
 			InstantiateProjectile.velocity = transform.TransformDirection(new Vector3(0f,0f,speed));
 			Debug.Log ("Firing");
 			Destroy(InstantiateProjectile.gameObject, 5f);

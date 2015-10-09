@@ -7,12 +7,14 @@ public class Cube : MonoBehaviour {
 	[SerializeField] int x;
 	[SerializeField] int y;
 	[SerializeField] int spacing;
+	[SerializeField] bool collided;
+	[SerializeField] Rigidbody rb;
 
 	void OnCollisionEnter(Collision other)
 	{
 		if (other.collider.CompareTag("Bullet"))
 		{
-			Destroy(gameObject);
+			collided = true;
 		}
 	}
 	// Use this for initialization
@@ -25,7 +27,12 @@ public class Cube : MonoBehaviour {
 				Vector3 pos = transform.position;
 				pos.x += i;
 				pos.y += j;
-				Instantiate(cube, pos, transform.rotation);
+				var box = Instantiate(cube, pos, transform.rotation);
+
+				if (collided)
+				{
+					Destroy(box);
+				}
 			}
 		}
 	}
