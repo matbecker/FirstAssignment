@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour {
 
+	public Camera cam;
 	public float speed;
 	public Rigidbody rb;
 	[SerializeField] Transform shootPoint;
@@ -12,15 +14,18 @@ public class Player : MonoBehaviour {
 	[SerializeField] GameObject bullet;
 	[SerializeField] Material material;
 	[SerializeField] ParticleSystem ps;
+	[SerializeField] int health;
+	[SerializeField] Text healthText;
 
 	// Use this for initialization
-	void Start () {
-
-
+	void Start () 
+	{
+		cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update () 
+	{
 
 		if (hasShot)
 		{
@@ -37,10 +42,26 @@ public class Player : MonoBehaviour {
 		{
 			hasShot = true;
 			Rigidbody InstantiateProjectile = Instantiate(rb, shootPoint.position, transform.rotation) as Rigidbody;
-			InstantiateProjectile.velocity = transform.TransformDirection(new Vector3(0.0f,0.0f,speed));
+			InstantiateProjectile.velocity = transform.TransformDirection(Vector3.forward * speed);
 			Destroy(InstantiateProjectile.gameObject, 1f);
 		}
+		if (health <= 0)
+		{
+			PlayerDeath();
+		}
+		healthText.text = ("Health: " + health);
+
 
 	
+	}
+	public void Damage(int dmg)
+	{
+		health -= dmg;
+		Camera.instance.Shake(0.2f,0.2f);
+	}
+	void PlayerDeath()
+	{
+		//restart the level
+		Application.LoadLevel(Application.loadedLevel);
 	}
 }

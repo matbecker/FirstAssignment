@@ -9,7 +9,7 @@ public class Bullet : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
-		//material.color = new Color(Random.Range(0.0f,1.0f),Random.Range(0.0f,1.0f),Random.Range(0.0f,1.0f));
+
 	}
 	
 	// Update is called once per frame
