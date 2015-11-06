@@ -7,12 +7,17 @@ public class EnemyBullet : MonoBehaviour {
 
 	void OnCollisionEnter(Collision other)
 	{
+		Destroy(gameObject);
 		if (other.collider.CompareTag("Player"))
 		{
+			//Destroy(gameObject);
 			player.Damage(1);
-			Destroy(gameObject);
 		}
-		Destroy(gameObject, 3.0f);
+		else
+		{
+			Destroy(gameObject, 3.0f);
+		}
+
 
 	}
 	// Use this for initialization
