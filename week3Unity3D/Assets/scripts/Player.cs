@@ -43,6 +43,7 @@ public class Player : MonoBehaviour {
 			hasShot = true;
 			Rigidbody InstantiateProjectile = Instantiate(rb, shootPoint.position, transform.rotation) as Rigidbody;
 			InstantiateProjectile.velocity = transform.TransformDirection(Vector3.forward * speed);
+			InstantiateProjectile.GetComponent<Bullet>().SetNextColor();
 			Destroy(InstantiateProjectile.gameObject, 1f);
 		}
 		if (health <= 0)
