@@ -6,7 +6,7 @@ public class Bullet : MonoBehaviour {
 	[SerializeField] Material material;
 	[SerializeField] Player player;
 	[SerializeField] Color[] bulletColors;
-	static int index = 0;
+	public static int index = 0;
 
 	// Use this for initialization
 	void Start () 

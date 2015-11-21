@@ -16,6 +16,8 @@ public class Player : MonoBehaviour {
 	[SerializeField] ParticleSystem ps;
 	[SerializeField] int health;
 	[SerializeField] Text healthText;
+	[SerializeField] Text bulletColor;
+	public Bullet bullets;
 
 	// Use this for initialization
 	void Start () 
@@ -51,6 +53,7 @@ public class Player : MonoBehaviour {
 			PlayerDeath();
 		}
 		healthText.text = ("Health: " + health);
+		bulletColor.text = ("Next Bullet:" + bullets.GetComponent<Renderer>().material.color.ToString());
 
 
 	
