@@ -11,11 +11,8 @@ public class EnemyBullet : MonoBehaviour {
 		if (other.collider.CompareTag("Player"))
 		{
 			//Destroy(gameObject);
+
 			player.Damage(1);
-		}
-		else
-		{
-			Destroy(other.gameObject, 3.0f);
 		}
 
 

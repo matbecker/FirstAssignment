@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
@@ -27,6 +28,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+		[SerializeField] float stamina;
+		[SerializeField] bool canRun;
+		[SerializeField] Image staminaBar;
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -62,6 +66,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private void Update()
         {
             RotateView();
+			UpdateStaminaBarUI();
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
             {
@@ -207,6 +212,28 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             bool waswalking = m_IsWalking;
 
+			if (!m_IsWalking && canRun)
+			{
+				stamina++;
+			}
+			else
+			{
+				stamina--;
+			}
+
+			if (stamina < 5.0f)
+			{
+				canRun = true;
+			}
+			if (stamina <= 0.0f)
+			{
+				stamina = 0.0f;
+			}
+			if (stamina >= 200.0f)
+			{
+				canRun = false;
+			}
+				
 #if !MOBILE_INPUT
             // On standalone builds, walk/run speed is modified by a key press.
             // keep track of whether or not the character is walking or running
@@ -214,6 +241,17 @@ namespace UnityStandardAssets.Characters.FirstPerson
 #endif
             // set the desired speed to be walking or running
             speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
+
+			if (!canRun)
+			{
+				m_RunSpeed = m_WalkSpeed;
+				m_WalkSpeed = 3.0f;
+			}
+			else
+			{
+				m_WalkSpeed = 5.0f;
+				m_RunSpeed = m_WalkSpeed * 2.0f;
+			}
             m_Input = new Vector2(horizontal, vertical);
 
             // normalize input if it exceeds 1 in combined length:
@@ -230,7 +268,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
             }
         }
+		void UpdateStaminaBarUI()
+		{
 
+			staminaBar.rectTransform.sizeDelta = new Vector2(stamina, 12);
+		}
 
         private void RotateView()
         {

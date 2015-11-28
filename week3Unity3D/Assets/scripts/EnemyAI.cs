@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class EnemyAI : MonoBehaviour {
 
+	[System.Serializable]
 	public enum Type
 	{
 		White,
@@ -27,143 +29,191 @@ public class EnemyAI : MonoBehaviour {
 	private Quaternion currentRot;
 	private Vector3 currentPos;
 	private float shotTimer;
-	private bool stopChasing;
+	[SerializeField] bool stopChasing;
 	private float timer;
-	[SerializeField] Color[] enemyColor;
-	[SerializeField] string enemyType;
+	[SerializeField] Color enemyColor;
 	[SerializeField] Material material;
 	[SerializeField] bool isPrimary;
 	[SerializeField] bool isSecondary;
-	[SerializeField] int health;
-	Type type = Type.White;
+	[SerializeField] float health;
+	[SerializeField] float maxHealth;
+	public Bullet bullets;
+	[SerializeField] string type;
+	[SerializeField] Image healthBarImage;
+	[SerializeField] Color[] secondaryColor;
+	[SerializeField] float chaseTimer;
+	[SerializeField] float chasePeriod;
+
 
 	// Use this for initialization
 	void Start () 
 	{
-		GetEnemyType();
-		SetEnemyType();
+		health = maxHealth;
 		player = GameObject.FindGameObjectWithTag("Player").GetComponentInChildren<Player>();
-
+		bullets = GameObject.FindGameObjectWithTag("Bullet").GetComponent<Bullet>();
+		GetComponent<Renderer>().material.color = enemyColor;
 	}
 	void LookAtPlayer()
 	{
 		Quaternion rotation = Quaternion.LookRotation(player.transform.position - transform.position, Vector3.up);
 		transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * rotationDamping);
 	}
-	void ChasePlayer()
+	void ChasePlayer(float ms)
 	{
-		transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+		transform.Translate(Vector3.forward * ms * Time.deltaTime);
 	}
 	void StopChasing()
 	{
 		stopChasing = true;
 	}
-	void ShootPlayer()
+	void ShootPlayer(float s)
 	{
 		Rigidbody InstantiateProjectile = Instantiate(rb, currentPos, currentRot) as Rigidbody;
-		InstantiateProjectile.velocity = transform.TransformDirection(new Vector3(0.0f,0.0f,speed));
+		InstantiateProjectile.velocity = transform.TransformDirection(new Vector3(0.0f,0.0f,s));
 	}
-	void SetEnemyType()
+	void Damage(int dmg)
 	{
-		switch (type)
+		Debug.Log("bullet:" + bullets.currentColor + "  " + "Enemy:" + type);
+		Debug.Log("Held bullet:" + bullets.nextColor + "  " + "Enemy:" + type);
+		if (bullets.currentColor == type || player.keyUp && bullets.nextColor == type)
 		{
-		case Type.Red:
-			material.color = enemyColor[0];
-			break;
-		case Type.Blue:
-			material.color = enemyColor[1];
-			break;
-		case Type.Purple:
-			material.color = enemyColor[2];
-			break;
-		case Type.Orange:
-			material.color = enemyColor[3];
-			break;
-		case Type.Yellow:
-			material.color = enemyColor[4];
-			break;
-		case Type.Green:
-			material.color = enemyColor[5];
-			break;
-		case Type.White:
-			material.color = enemyColor[6];
-			break;
-		default:
-			break;
-			
+			dmg *= 5;
+		}
+
+		health -= dmg;
+
+		if (health <= 0)
+		{
+			Destroy(gameObject);
 		}
 	}
-	void GetEnemyType()
+	void SetEnemyColor()
 	{
-		if (enemyType == "Blue")
+		if (type == "Blue" || type == "Red" || type == "Yellow")
 		{
-			type = Type.Blue;
-		}
-		else if (enemyType == "Red")
-		{
-			type = Type.Red;
-		}
-		else if (enemyType == "Yellow")
-		{
-			type = Type.Yellow;
+			isPrimary = true;
 		}
 		else
 		{
 			isSecondary = true;
+			isPrimary = false;
+		}
+	}
+	void OnCollisionEnter(Collision other)
+	{
+		if (other.collider.CompareTag("Bullet"))
+		{
+			Damage(1);
+		}
+		if (this.CompareTag("Blue") && other.collider.CompareTag("Red") || this.CompareTag("Red") && other.collider.CompareTag("Blue"))
+		{
+			type = "Purple";
+			GetComponent<Renderer>().material.color = secondaryColor[0];
+		}
+		if (this.CompareTag("Red") && other.collider.CompareTag("Yellow") || this.CompareTag("Yellow") && other.collider.CompareTag("Red"))
+		{
+			type = "Orange";
+			GetComponent<Renderer>().material.color = secondaryColor[1];
+		}
+		if (this.CompareTag("Blue") && other.collider.CompareTag("Yellow") || this.CompareTag("Yellow") && other.collider.CompareTag("Blue"))
+		{
+			type = "Green";
+			GetComponent<Renderer>().material.color = secondaryColor[2];
+		}
+		if (other.collider.CompareTag("Player") && isSecondary)
+		{
+			player.Damage(1);
 		}
 
-		if (enemyType == "Green")
-		{
-			type = Type.Green;
-		}
-		else if (enemyType == "Orange")
-		{
-			type = Type.Orange;
-		}
-		else if (enemyType == "Purple")
-		{
-			type = Type.Purple;
-		}
-		else
-		{
-			isPrimary = true;
-		}
+	}
+	
+	void UpdateHealthUI()
+	{
+		float currHealth = health / maxHealth;
+		healthBarImage.rectTransform.localScale = new Vector3(currHealth, healthBarImage.rectTransform.localScale.y, healthBarImage.rectTransform.localScale.z);
 	}
 	// Update is called once per frame
 	void Update () 
 	{
-		SetEnemyType();
+		SetEnemyColor();
+		UpdateHealthUI();
 		playerDistance = Vector3.Distance(player.transform.position, transform.position);
 		currentRot = transform.rotation;
 		currentPos = lookPoint.transform.position;
-		if (playerDistance < 25.0f)
-		{
-			LookAtPlayer();
-		}
-		if (playerDistance < 15.0f && !stopChasing)
-		{
-			ChasePlayer();
-		}
 
-		if (playerDistance < 5.0f)
+		if (isPrimary)
 		{
-
-			StopChasing();
-			shotTimer += Time.deltaTime;
-			if (shotTimer > shotDelay)
+			if (playerDistance < 25.0f)
 			{
-				ShootPlayer();
-				shotTimer = 0.0f;
+				LookAtPlayer();
+			}
+			if (playerDistance < 15.0f && !stopChasing)
+			{
+				ChasePlayer(5.0f);
+			}
+
+			if (playerDistance < 5.0f)
+			{
+
+				StopChasing();
+				shotTimer += Time.deltaTime;
+
+				if (shotTimer > shotDelay)
+				{
+					ShootPlayer(20.0f);
+					shotTimer = 0.0f;
+				}
+			}
+			else
+			{
+				timer += Time.deltaTime;
+
+				if (timer > chaseCooldown)
+				{
+					stopChasing = false;
+					timer = 0.0f;
+				}
 			}
 		}
-		else
-		{
-			timer += Time.deltaTime;
 
-			if (timer > chaseCooldown)
+		if (isSecondary)
+		{
+			if (type == "Purple")
 			{
-				stopChasing = false;
-				timer = 0.0f;
+				LookAtPlayer();
+				ChasePlayer(7.0f);
+			}
+			if (type == "Orange")
+			{
+
+				LookAtPlayer();
+				if (!stopChasing)
+				{
+					ChasePlayer(10.0f);
+				}
+
+				chaseTimer += Time.deltaTime;
+
+				if (chaseTimer > chasePeriod)
+				{
+					StopChasing();
+
+					if (chaseTimer > 3.0f)
+					{
+						ShootPlayer(30.0f);
+					}
+
+					if (chaseTimer > 4.0f)
+					{
+						chaseTimer = 0.0f;
+						stopChasing = false;
+					}
+
+				}
+			}
+			if (type == "Green")
+			{
+
 			}
 		}
 	
