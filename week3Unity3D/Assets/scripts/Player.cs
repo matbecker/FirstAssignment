@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityStandardAssets.Characters.FirstPerson;
 
 public class Player : MonoBehaviour {
 
 	public Camera cam;
-	public float speed;
+	public float bulletSpeed;
 	public Rigidbody rb;
 	[SerializeField] Transform shootPoint;
 	private float timer;
@@ -14,8 +15,8 @@ public class Player : MonoBehaviour {
 	[SerializeField] GameObject bullet;
 	[SerializeField] Material material;
 	[SerializeField] ParticleSystem ps;
-	[SerializeField] float health;
-	[SerializeField] float maxHealth;
+	public float health;
+	public float maxHealth;
 	[SerializeField] Text healthText;
 	[SerializeField] Text bulletColor;
 	[SerializeField] float bulletShot;
@@ -30,11 +31,23 @@ public class Player : MonoBehaviour {
 	public bool keyUp = true;
 	[SerializeField] float coolDown;
 	[SerializeField] float invincibleTimer;
+	[SerializeField] Texture crosshair;
+	public PowerUps powerUp;
+	[SerializeField] float powerUpTimer;
+	[SerializeField] float powerUpDuration;
+
+	public bool checkForPowerUps;
+	public bool hasRapidFire;
+	public bool hasInfiniteRun;
+	public FirstPersonController FPC;
 	// Use this for initialization
 	void Start () 
 	{
 		health = maxHealth;
 		cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+		hasRapidFire = false;
+		hasInfiniteRun = false;
+
 	}
 	
 	// Update is called once per frame
@@ -59,6 +72,36 @@ public class Player : MonoBehaviour {
 			invincibleTimer = 0.0f;
 			setInvincible = false;
 		}
+//		if (checkForPowerUps)
+//		{
+//			powerUp = GameObject.FindGameObjectWithTag("PowerUp").GetComponent<PowerUps>();
+//
+//		}
+		if (hasInfiniteRun || hasRapidFire)
+		{
+			powerUpTimer += Time.deltaTime;
+
+			if (powerUpTimer > powerUpDuration)
+			{
+				checkForPowerUps = false;
+				powerUpTimer = 0.0f;
+				hasRapidFire = false;
+				hasInfiniteRun = false;
+			}
+		}
+		if (hasRapidFire)
+		{
+			shotDelay = 0.1f;
+		}
+		else 
+		{
+			shotDelay = 0.3f;
+		}
+
+		if (hasInfiniteRun)
+		{
+			FPC.stamina = -1.0f;
+		}
 
 		if (Input.GetKeyUp("z") && keyUp)
 		{
@@ -72,7 +115,7 @@ public class Player : MonoBehaviour {
 			hasShot = true;
 			Rigidbody InstantiateProjectile = Instantiate(rb, shootPoint.position, transform.rotation) as Rigidbody;
 			bulletShot++;
-			InstantiateProjectile.velocity = transform.TransformDirection(Vector3.forward * speed);
+			InstantiateProjectile.velocity = transform.TransformDirection(Vector3.forward * bulletSpeed);
 			InstantiateProjectile.GetComponent<Bullet>().SetColor();
 			Destroy(InstantiateProjectile.gameObject, 1f);
 		}
@@ -87,7 +130,7 @@ public class Player : MonoBehaviour {
 			}
 		}
 
-		if (bulletShot >= overHeatAmount)
+		if (bulletShot >= overHeatAmount && !hasRapidFire)
 		{
 			bulletShot = overHeatAmount;
 			gunOverHeating = true;
@@ -121,11 +164,20 @@ public class Player : MonoBehaviour {
 	void UpdateHeatBarUI()
 	{
 		float heatAmount = bulletShot/overHeatAmount;
+		if (hasRapidFire && heatAmount >= 1.0f)
+		{
+			heatAmount = 1.0f;
+		}
 		heatBar.rectTransform.sizeDelta = new Vector2(rectWidth * heatAmount, 12);
+	}
+	void OnGUI()
+	{
+		GUI.Label(new Rect(Screen.width / 1.95f, Screen.height / 1.8f, 64,64), crosshair);
 	}
 	void PlayerDeath()
 	{
 		//restart the level
 		Application.LoadLevel(Application.loadedLevel);
 	}
+
 }

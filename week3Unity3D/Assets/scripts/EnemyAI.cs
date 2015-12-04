@@ -43,6 +43,9 @@ public class EnemyAI : MonoBehaviour {
 	[SerializeField] Color[] secondaryColor;
 	[SerializeField] float chaseTimer;
 	[SerializeField] float chasePeriod;
+	[SerializeField] GameObject[] powerUp;
+	[SerializeField] int rand;
+	[SerializeField] int randPowerUp;
 
 
 	// Use this for initialization
@@ -73,8 +76,8 @@ public class EnemyAI : MonoBehaviour {
 	}
 	void Damage(int dmg)
 	{
-		Debug.Log("bullet:" + bullets.currentColor + "  " + "Enemy:" + type);
-		Debug.Log("Held bullet:" + bullets.nextColor + "  " + "Enemy:" + type);
+		//Debug.Log("bullet:" + bullets.currentColor + "  " + "Enemy:" + type);
+		//Debug.Log("Held bullet:" + bullets.nextColor + "  " + "Enemy:" + type);
 		if (bullets.currentColor == type || player.keyUp && bullets.nextColor == type)
 		{
 			dmg *= 5;
@@ -84,7 +87,7 @@ public class EnemyAI : MonoBehaviour {
 
 		if (health <= 0)
 		{
-			Destroy(gameObject);
+			OnEnemyDeath();
 		}
 	}
 	void SetEnemyColor()
@@ -131,6 +134,20 @@ public class EnemyAI : MonoBehaviour {
 	{
 		float currHealth = health / maxHealth;
 		healthBarImage.rectTransform.localScale = new Vector3(currHealth, healthBarImage.rectTransform.localScale.y, healthBarImage.rectTransform.localScale.z);
+	}
+	void OnEnemyDeath()
+	{
+
+		rand = Random.Range(0,5);
+		randPowerUp = Random.Range(0,3);
+		Debug.Log(randPowerUp);
+		//instantiate a power up in the random value returns 2
+		//if (rand == 2)
+		//{
+			Instantiate(powerUp[randPowerUp], transform.position, Quaternion.identity);
+			player.checkForPowerUps = true;
+		//}
+		Destroy(gameObject);
 	}
 	// Update is called once per frame
 	void Update () 
@@ -183,6 +200,8 @@ public class EnemyAI : MonoBehaviour {
 				LookAtPlayer();
 				ChasePlayer(7.0f);
 			}
+
+
 			if (type == "Orange")
 			{
 
