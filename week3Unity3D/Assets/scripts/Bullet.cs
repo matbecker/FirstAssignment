@@ -9,6 +9,7 @@ public class Bullet : MonoBehaviour {
 	public static int index = 0;
 	public string nextColor;
 	public string currentColor;
+	public string prevColor;
 	[SerializeField] bool isGun;
 
 	// Use this for initialization
@@ -41,41 +42,61 @@ public class Bullet : MonoBehaviour {
 //		{
 //			Destroy(gameObject);
 //		}
+		Destroy(gameObject, 0.05f);
 	}
 	public static void SetNextColor(){
 		index++;
 	}
 	public void GetNextColor()
 	{
-		if (index == 1)
+		if (index == 0)
 		{
 			nextColor = "Blue";
 
 			currentColor = "Red";
+
+			prevColor = "Green";
 		}
-		else if (index == 2)
+		else if (index == 1)
 		{
 			nextColor = "Purple";
 
 			currentColor = "Blue";
+
+			prevColor = "Red";
 		}
-		else if (index == 3)
+		else if (index == 2)
 		{
 			nextColor = "Orange";
 
 			currentColor = "Purple";
+
+			prevColor = "Blue";
 		}
-		else if (index == 4)
+		else if (index == 3)
 		{
 			nextColor = "Yellow";
 
 			currentColor = "Orange";
+
+			prevColor = "Purple";
 		}
-		else if (index == 5)
+		else if (index == 4)
 		{
 			nextColor = "Green";
 
 			currentColor = "Yellow";
+
+			prevColor = "Orange";
+		}
+		else if (index == 5)
+		{
+			
+			nextColor = "Red";
+			
+			currentColor = "Green";
+
+			prevColor = "Yellow";
 		}
 		else 
 		{

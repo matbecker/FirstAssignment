@@ -22,6 +22,7 @@ public class Player : MonoBehaviour {
 	[SerializeField] float bulletShot;
 	[SerializeField] Image healthBar;
 	[SerializeField] Image heatBar;
+	[SerializeField] Image PowerupBar;
 	[SerializeField] float overHeatAmount;
 	public Bullet bullets;
 	[SerializeField] bool gunOverHeating;
@@ -35,11 +36,12 @@ public class Player : MonoBehaviour {
 	public PowerUps powerUp;
 	[SerializeField] float powerUpTimer;
 	[SerializeField] float powerUpDuration;
-
 	public bool checkForPowerUps;
 	public bool hasRapidFire;
 	public bool hasInfiniteRun;
 	public FirstPersonController FPC;
+	public Bullet b;
+
 	// Use this for initialization
 	void Start () 
 	{
@@ -47,6 +49,7 @@ public class Player : MonoBehaviour {
 		cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 		hasRapidFire = false;
 		hasInfiniteRun = false;
+		//PowerupBar.color = new Color(230.0f,0.0f,255.0f,0.0f);
 
 	}
 	
@@ -79,6 +82,9 @@ public class Player : MonoBehaviour {
 //		}
 		if (hasInfiniteRun || hasRapidFire)
 		{
+
+			DisplayPowerUpTimer();
+
 			powerUpTimer += Time.deltaTime;
 
 			if (powerUpTimer > powerUpDuration)
@@ -87,6 +93,10 @@ public class Player : MonoBehaviour {
 				powerUpTimer = 0.0f;
 				hasRapidFire = false;
 				hasInfiniteRun = false;
+			}
+			if (powerUpTimer > powerUpDuration - 0.5)
+			{
+				PowerupBar.CrossFadeAlpha(0.0f,0.5f,false);
 			}
 		}
 		if (hasRapidFire)
@@ -105,12 +115,14 @@ public class Player : MonoBehaviour {
 
 		if (Input.GetKeyUp("z") && keyUp)
 		{
+			//Debug.Log("prev: " + b.prevColor + " current: " + b.currentColor + " next: " + b.nextColor);
 			//index doesnt increase until the key is pressed up 
 			Bullet.SetNextColor();
 			keyUp = false;
 		}
 		if (Input.GetKey("z") && timer == 0.0f && !gunOverHeating)
 		{
+			//Debug.Log("prev: " + b.prevColor + " current: " + b.currentColor + " next: " + b.nextColor);
 			keyUp = true;
 			hasShot = true;
 			Rigidbody InstantiateProjectile = Instantiate(rb, shootPoint.position, transform.rotation) as Rigidbody;
@@ -152,14 +164,20 @@ public class Player : MonoBehaviour {
 		if (invincibleTimer == 0.0f)
 		{
 			health -= dmg;
+			Camera.instance.Shake(0.2f,0.2f);
 		}
 		setInvincible = true;
-		Camera.instance.Shake(0.2f,0.2f);
 	}
 	void UpdateHealthUI()
 	{
 		float currHealth = health / maxHealth;
 		healthBar.rectTransform.sizeDelta = new Vector2(rectWidth * currHealth, 12);
+	}
+	void DisplayPowerUpTimer()
+	{
+		PowerupBar.color = new Color(230.0f,0.0f,255.0f,255.0f);
+		float time = (powerUpDuration - powerUpTimer) / powerUpDuration;
+		PowerupBar.rectTransform.sizeDelta = new Vector2(rectWidth * time, 12);
 	}
 	void UpdateHeatBarUI()
 	{

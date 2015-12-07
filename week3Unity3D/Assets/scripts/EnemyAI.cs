@@ -46,6 +46,7 @@ public class EnemyAI : MonoBehaviour {
 	[SerializeField] GameObject[] powerUp;
 	[SerializeField] int rand;
 	[SerializeField] int randPowerUp;
+	[SerializeField] bool invincible;
 
 
 	// Use this for initialization
@@ -53,10 +54,10 @@ public class EnemyAI : MonoBehaviour {
 	{
 		health = maxHealth;
 		player = GameObject.FindGameObjectWithTag("Player").GetComponentInChildren<Player>();
-		bullets = GameObject.FindGameObjectWithTag("Bullet").GetComponent<Bullet>();
+		bullets = GameObject.FindGameObjectWithTag("Gun").GetComponent<Bullet>();
 		GetComponent<Renderer>().material.color = enemyColor;
 	}
-	void LookAtPlayer()
+	void LookAtPlayer(float rotationDamping)
 	{
 		Quaternion rotation = Quaternion.LookRotation(player.transform.position - transform.position, Vector3.up);
 		transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * rotationDamping);
@@ -69,22 +70,33 @@ public class EnemyAI : MonoBehaviour {
 	{
 		stopChasing = true;
 	}
-	void ShootPlayer(float s)
+	void ShootPlayer(float s, bool burst)
 	{
-		Rigidbody InstantiateProjectile = Instantiate(rb, currentPos, currentRot) as Rigidbody;
-		InstantiateProjectile.velocity = transform.TransformDirection(new Vector3(0.0f,0.0f,s));
+		if (!burst)
+		{
+			Rigidbody InstantiateProjectile = Instantiate(rb, currentPos, currentRot) as Rigidbody;
+			InstantiateProjectile.velocity = transform.TransformDirection(new Vector3(0.0f,0.0f,s));
+		}
+		if (burst)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				Rigidbody InstantiateProjectile = Instantiate(rb, new Vector3(currentPos.x, currentPos.y, currentPos.z - 1 + i), currentRot) as Rigidbody;
+				InstantiateProjectile.velocity = transform.TransformDirection(new Vector3(0.0f,0.0f,s));
+			}
+		}
 	}
 	void Damage(int dmg)
 	{
-		//Debug.Log("bullet:" + bullets.currentColor + "  " + "Enemy:" + type);
-		//Debug.Log("Held bullet:" + bullets.nextColor + "  " + "Enemy:" + type);
-		if (bullets.currentColor == type || player.keyUp && bullets.nextColor == type)
+		//Debug.Log("current bullet:" + bullets.currentColor + "  " + "Enemy:" + type);
+		//Debug.Log("next bullet:" + bullets.nextColor + "  " + "Enemy:" + type);
+		if (player.keyUp && bullets.currentColor == type || !player.keyUp && bullets.prevColor == type)
 		{
 			dmg *= 5;
 		}
 
 		health -= dmg;
-
+		Debug.Log(dmg);
 		if (health <= 0)
 		{
 			OnEnemyDeath();
@@ -104,21 +116,23 @@ public class EnemyAI : MonoBehaviour {
 	}
 	void OnCollisionEnter(Collision other)
 	{
-		if (other.collider.CompareTag("Bullet"))
+		if (other.collider.CompareTag("Bullet") && !invincible)
 		{
 			Damage(1);
+			invincible = true;
+			//Destroy(other.gameObject);
 		}
-		if (this.CompareTag("Blue") && other.collider.CompareTag("Red") || this.CompareTag("Red") && other.collider.CompareTag("Blue"))
+		if (!isSecondary && this.CompareTag("Blue") && other.collider.CompareTag("Red") || !isSecondary && this.CompareTag("Red") && other.collider.CompareTag("Blue"))
 		{
 			type = "Purple";
 			GetComponent<Renderer>().material.color = secondaryColor[0];
 		}
-		if (this.CompareTag("Red") && other.collider.CompareTag("Yellow") || this.CompareTag("Yellow") && other.collider.CompareTag("Red"))
+		if (!isSecondary && this.CompareTag("Red") && other.collider.CompareTag("Yellow") || !isSecondary && this.CompareTag("Yellow") && other.collider.CompareTag("Red"))
 		{
 			type = "Orange";
 			GetComponent<Renderer>().material.color = secondaryColor[1];
 		}
-		if (this.CompareTag("Blue") && other.collider.CompareTag("Yellow") || this.CompareTag("Yellow") && other.collider.CompareTag("Blue"))
+		if (isPrimary && this.CompareTag("Blue") && other.collider.CompareTag("Yellow") || isPrimary && this.CompareTag("Yellow") && other.collider.CompareTag("Blue"))
 		{
 			type = "Green";
 			GetComponent<Renderer>().material.color = secondaryColor[2];
@@ -128,6 +142,13 @@ public class EnemyAI : MonoBehaviour {
 			player.Damage(1);
 		}
 
+	}
+	void OnCollisionExit(Collision other)
+	{
+		if (other.collider.CompareTag("Bullet"))
+		{
+			invincible = false;
+		}
 	}
 	
 	void UpdateHealthUI()
@@ -140,7 +161,7 @@ public class EnemyAI : MonoBehaviour {
 
 		rand = Random.Range(0,5);
 		randPowerUp = Random.Range(0,3);
-		Debug.Log(randPowerUp);
+		//Debug.Log(randPowerUp);
 		//instantiate a power up in the random value returns 2
 		//if (rand == 2)
 		//{
@@ -162,7 +183,7 @@ public class EnemyAI : MonoBehaviour {
 		{
 			if (playerDistance < 25.0f)
 			{
-				LookAtPlayer();
+				LookAtPlayer(2.0f);
 			}
 			if (playerDistance < 15.0f && !stopChasing)
 			{
@@ -177,7 +198,7 @@ public class EnemyAI : MonoBehaviour {
 
 				if (shotTimer > shotDelay)
 				{
-					ShootPlayer(20.0f);
+					ShootPlayer(20.0f, false);
 					shotTimer = 0.0f;
 				}
 			}
@@ -197,7 +218,7 @@ public class EnemyAI : MonoBehaviour {
 		{
 			if (type == "Purple")
 			{
-				LookAtPlayer();
+				LookAtPlayer(2.0f);
 				ChasePlayer(7.0f);
 			}
 
@@ -205,7 +226,7 @@ public class EnemyAI : MonoBehaviour {
 			if (type == "Orange")
 			{
 
-				LookAtPlayer();
+				LookAtPlayer(2.0f);
 				if (!stopChasing)
 				{
 					ChasePlayer(10.0f);
@@ -219,7 +240,7 @@ public class EnemyAI : MonoBehaviour {
 
 					if (chaseTimer > 3.0f)
 					{
-						ShootPlayer(30.0f);
+						ShootPlayer(30.0f, false);
 					}
 
 					if (chaseTimer > 4.0f)
@@ -232,6 +253,14 @@ public class EnemyAI : MonoBehaviour {
 			}
 			if (type == "Green")
 			{
+				LookAtPlayer(5.0f);
+				shotTimer += Time.deltaTime;
+
+				if (shotTimer > 0.5f)
+				{
+					ShootPlayer(40.0f, true);
+					shotTimer = 0.0f;
+				}
 
 			}
 		}
