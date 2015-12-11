@@ -42,7 +42,8 @@ public class Bullet : MonoBehaviour {
 //		{
 //			Destroy(gameObject);
 //		}
-		Destroy(gameObject, 0.05f);
+		Destroy(gameObject, 0.01f);
+
 	}
 	public static void SetNextColor(){
 		index++;

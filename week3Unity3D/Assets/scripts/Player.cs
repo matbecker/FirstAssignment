@@ -41,6 +41,7 @@ public class Player : MonoBehaviour {
 	public bool hasInfiniteRun;
 	public FirstPersonController FPC;
 	public Bullet b;
+	public EnemyAI enemy;
 
 	// Use this for initialization
 	void Start () 
