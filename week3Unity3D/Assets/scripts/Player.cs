@@ -173,9 +173,12 @@ public class Player : MonoBehaviour {
 	{
 		float currHealth = health / maxHealth;
 		healthBar.rectTransform.sizeDelta = new Vector2(rectWidth * currHealth, 12);
+
+
 	}
 	void DisplayPowerUpTimer()
 	{
+		PowerupBar.CrossFadeAlpha(1.0f,0.2f,false);
 		PowerupBar.color = new Color(230.0f,0.0f,255.0f,255.0f);
 		float time = (powerUpDuration - powerUpTimer) / powerUpDuration;
 		PowerupBar.rectTransform.sizeDelta = new Vector2(rectWidth * time, 12);
@@ -188,6 +191,7 @@ public class Player : MonoBehaviour {
 			heatAmount = 1.0f;
 		}
 		heatBar.rectTransform.sizeDelta = new Vector2(rectWidth * heatAmount, 12);
+
 	}
 	void OnGUI()
 	{

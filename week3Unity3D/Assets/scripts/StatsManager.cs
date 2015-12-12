@@ -12,6 +12,7 @@ public class StatsManager : MonoBehaviour {
 		public Image statBar;
 		public Image border;
 		public float currentExperience;
+		public Text currentLevelText;
 
 		public void AddXp(int xp){
 			currentExperience += xp;
@@ -21,6 +22,7 @@ public class StatsManager : MonoBehaviour {
 				levelUpAmount = (currentLevel + Mathf.Log(currentLevel)*MULTIPLIER) * BASE_XP;
 			}
 		}
+
 	};
 
 	[SerializeField] Stat[] stats;
@@ -43,6 +45,7 @@ public class StatsManager : MonoBehaviour {
 		foreach(var stat in stats){
 			float currentEXP = stat.currentExperience / stat.levelUpAmount;
 			stat.statBar.rectTransform.sizeDelta = new Vector2(rectWidth * currentEXP, rectHeight);
+			stat.currentLevelText.text = ("" + stat.currentLevel);
 		}
 	}
 
@@ -51,6 +54,7 @@ public class StatsManager : MonoBehaviour {
 		foreach(var stat in stats){
 			stat.statBar.CrossFadeAlpha(0.0f,0.5f,true);
 			stat.border.CrossFadeAlpha(0.0f,0.5f,true);
+			stat.currentLevelText.CrossFadeAlpha(0.0f,0.5f,true);
 		}
 	}
 	public void EnableStatBarImages()
@@ -58,6 +62,7 @@ public class StatsManager : MonoBehaviour {
 		foreach(var stat in stats){
 			stat.statBar.CrossFadeAlpha(1.0f,0.5f,true);
 			stat.border.CrossFadeAlpha(1.0f,0.5f,true);
+			stat.currentLevelText.CrossFadeAlpha(1.0f,0.5f,true);
 		}
 	}
 

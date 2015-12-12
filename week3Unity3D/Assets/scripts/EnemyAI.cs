@@ -34,6 +34,7 @@ public class EnemyAI : MonoBehaviour {
 	[SerializeField] int rand;
 	[SerializeField] int randPowerUp;
 	[SerializeField] bool invincible;
+	[SerializeField] Text damageText;
 
 	// Use this for initialization
 	void Start () 
@@ -42,6 +43,7 @@ public class EnemyAI : MonoBehaviour {
 		player = GameObject.FindGameObjectWithTag("Player").GetComponentInChildren<Player>();
 		bullets = GameObject.FindGameObjectWithTag("Gun").GetComponent<Bullet>();
 		GetComponent<Renderer>().material.color = enemyColor;
+		damageText.CrossFadeAlpha(0.0f,0.1f, true);
 	}
 	void LookAtPlayer(float rotationDamping)
 	{
@@ -81,6 +83,7 @@ public class EnemyAI : MonoBehaviour {
 		//Debug.Log("next bullet:" + bullets.nextColor + "  " + "Enemy:" + type);
 
 		//hurt the enemy more when they are hit with a bullet matching their own color
+
 		if (player.keyUp && bullets.currentColor == type || !player.keyUp && bullets.prevColor == type)
 		{
 			dmg *= 5;
@@ -112,6 +115,8 @@ public class EnemyAI : MonoBehaviour {
 		}
 
 		health -= dmg;
+		StartCoroutine(DisplayDamageAmount());
+		damageText.text = ("" + dmg);
 		Debug.Log(dmg);
 		if (health <= 0)
 		{
@@ -130,6 +135,14 @@ public class EnemyAI : MonoBehaviour {
 			isSecondary = true;
 			isPrimary = false;
 		}
+	}
+	IEnumerator DisplayDamageAmount()
+	{
+		damageText.CrossFadeAlpha(1.0f,0.2f,true);
+		 
+		yield return new WaitForSeconds(0.4f);
+
+		damageText.CrossFadeAlpha(0.0f,0.2f, true);
 	}
 	void OnCollisionEnter(Collision other)
 	{
@@ -198,6 +211,7 @@ public class EnemyAI : MonoBehaviour {
 		playerDistance = Vector3.Distance(player.transform.position, transform.position);
 		currentRot = transform.rotation;
 		currentPos = lookPoint.transform.position;
+
 		if (isPrimary)
 		{
 			if (playerDistance < 25.0f)
