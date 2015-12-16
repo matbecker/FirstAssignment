@@ -54,6 +54,7 @@
      <Compile Include="Assets\scripts\EnemyBullet.cs" />
      <Compile Include="Assets\scripts\EnemySpawner.cs" />
      <Compile Include="Assets\scripts\FashingBlock.cs" />
+     <Compile Include="Assets\scripts\Lights.cs" />
      <Compile Include="Assets\scripts\NetworkManager.cs" />
      <Compile Include="Assets\scripts\PathAroundTransforms.cs" />
      <Compile Include="Assets\scripts\PauseMenu.cs" />

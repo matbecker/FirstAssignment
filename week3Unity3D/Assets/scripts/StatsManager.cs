@@ -35,7 +35,7 @@ public class StatsManager : MonoBehaviour {
 		instance = this;
 		DisableStatBarImages();
 		for(var i = 0; i < 10; i++){
-			Debug.Log ((i + Mathf.Log (i) * 1.3f)*10f);
+			//Debug.Log ((i + Mathf.Log (i) * 1.3f)*10f);
 		}
 	}
 	
